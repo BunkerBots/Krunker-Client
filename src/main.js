@@ -100,7 +100,7 @@ function initClient() { // splash and game
     const splashScreen = createSplashWindow();
     const gameScreen = createGameWindow(krunkerurl.toString());
     gameScreen.once('ready-to-show', async() => {
-        wait(5000).then(() => {
+        wait(3000).then(() => {
             splashScreen.destroy();
             gameScreen.show();
         });
