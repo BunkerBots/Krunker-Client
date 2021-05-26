@@ -28,9 +28,10 @@ function initSplashWindow() {
 }
 
 function initClient(url, webContents) {
+    const { width, height } = screen.getPrimaryDisplay().workArea;
     const win = new BrowserWindow({
-        width: display.width,
-        height: display.height,
+        width: width,
+        height: height,
         center: true,
         show: false,
         webPreferences: {
@@ -46,8 +47,6 @@ function initClient(url, webContents) {
 
 
 app.once('ready', async() => {
-    const displayRes = screen.getPrimaryDisplay().workArea;
-    display = displayRes;
     const splash = initSplashWindow();
     const mainWin = initClient(krunkerurl);
     mainWin.once('ready-to-show', async() => {
