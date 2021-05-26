@@ -21,7 +21,10 @@ function createShortcutKeys() {
     shortcuts.register(game, 'Escape', () => contents.executeJavaScript('document.exitPointerLock()', true));
     shortcuts.register(game, 'F5', () => contents.reload());
     shortcuts.register(game, 'Shift+F5', () => contents.reloadIgnoringCache());
-    shortcuts.register(game, 'F11', () => game.setFullScreen(!game.isFullScreen()));
+    shortcuts.register(game, 'F11', () => {
+        if (!game.isFullScreen()) game.setFullScreen(true);
+        else game.setFullScreen(false);
+    });
     shortcuts.register(game, 'CommandOrControl+L', () => clipboard.writeText(contents.getURL()));
     shortcuts.register(game, 'F6', () => {
         app.quit();
@@ -70,9 +73,9 @@ function createGameWindow(url, webContents) {
 function initClient() { // splash and game
     const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
     const splashScreen = createSplashWindow();
-    const gameScreen = createGameWindow(krunkerurl);
+    const gameScreen = createGameWindow(krunkerurl.toString());
     gameScreen.once('ready-to-show', async() => {
-        wait(10000).then(() => {
+        wait(5000).then(() => {
             splashScreen.destroy();
             gameScreen.show();
         });

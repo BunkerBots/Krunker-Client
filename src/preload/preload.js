@@ -9,14 +9,14 @@ window.addEventListener('DOMContentLoaded', () => {
         replaceText(`${type}-version`, process.versions[type]);
 });
 
-window.addEventListener('keydown', e => {
-    switch (e.key) {
-    case 'F3': window.home(); break;
-    case 'F4': window.location.reload(); break;
-    case 'Escape': escapeHandler(); break;
-    default: break;
-    }
-});
+// window.addEventListener('keydown', e => {
+//     switch (e.key) {
+//     case 'F3': window.home(); break;
+//     case 'F4': window.location.reload(); break;
+//     case 'Escape': escapeHandler(); break;
+//     default: break;
+//     }
+// });
 
 // const escapeHandler = () => {
 //     if (!(endUI.style.display === 'none')) {
