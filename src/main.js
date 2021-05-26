@@ -20,7 +20,7 @@ function initSplashWindow() {
         transparent: true,
         alwaysOnTop: true,
         webPreferences: {
-            preload: path.join(__dirname, 'splash.js')
+            preload: `${__dirname}/splash.js`,
         }
     });
     win.loadFile('src/html/splash.html');
@@ -34,6 +34,7 @@ function initClient(url, webContents) {
         height: height,
         center: true,
         show: false,
+        backgroundColor: '#6e7373',
         webPreferences: {
             preload: path.join(__dirname, 'preload.js')
         }
