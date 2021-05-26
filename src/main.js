@@ -1,20 +1,14 @@
-const { app, BrowserWindow, screen } = require('electron'),
-    path = require('path');
+/* eslint-disable no-unused-vars */
+const { app, BrowserWindow, screen, globalShortcut } = require('electron');
+const path = require('path');
+const { keys } = require('./javascript/functions');
+const krunkerurl = 'https://krunker.io/';
+const Store = require('electron-store');
+const store = new Store();
 let display;
 
 if (!app.requestSingleInstanceLock()) app.quit();
 
-function initClient() {
-    const win = new BrowserWindow({
-        width: 1600,
-        height: 900,
-        webPreferences: {
-            preload: path.join(__dirname, 'preload.js')
-        }
-    });
-    win.loadURL('https://krunker.io/');
-    // win.loadFile('src/html/index.html');
-}
 
 function initSplashWindow() {
     const win = new BrowserWindow({
@@ -22,30 +16,49 @@ function initSplashWindow() {
         height: 300,
         center: true,
         resizable: false,
-        show: false,
         frame: false,
         transparent: true,
+        alwaysOnTop: true,
         webPreferences: {
-            preload: path.join(__dirname, 'preload/splash.js')
+            preload: path.join(__dirname, 'splash.js')
+        }
+    });
+    win.loadFile('src/html/splash.html');
+    return win;
+}
+
+function initClient(url, webContents) {
+    const win = new BrowserWindow({
+        width: display.width,
+        height: display.height,
+        center: true,
+        show: false,
+        webPreferences: {
+            preload: path.join(__dirname, 'preload.js')
         }
     });
     const contents = win.webContents;
 
-    launchGame();
-
-    function launchGame() {
-        initClient('https://krunker.io/');
-        setTimeout(() => win.destroy(), 2000);
-    }
+    keys(win, initClient, app, true);
+    if (!webContents) win.loadURL(url);
+    return win;
 }
 
 
-app.once('ready', () => {
-    initClient();
+app.once('ready', async() => {
+    const displayRes = screen.getPrimaryDisplay().workArea;
+    display = displayRes;
+    const splash = initSplashWindow();
+    const mainWin = initClient(krunkerurl);
+    mainWin.once('ready-to-show', async() => {
+        wait(10000).then(() => {
+            splash.destroy();
+            mainWin.show();
+        });
+    });
 });
+const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
 // app.whenReady().then(() => {
-//     const displayRes = screen.getPrimaryDisplay().workArea;
-//     display = displayRes;
 //     initClient();
 // });
 
@@ -58,4 +71,8 @@ app.once('ready', () => {
 
 app.on('quit', () => {
     app.quit();
+});
+
+app.on('window-all-closed', () => {
+    if (process.platform != 'darwin') app.quit();
 });
