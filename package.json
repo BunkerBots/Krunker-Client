@@ -3,17 +3,24 @@
   "version": "1.0.0",
   "description": "A krunker client.",
   "main": "./src/main.js",
+  "build": {
+    "appId": "com.atom.quickstart",
+    "win": {
+      "target": "nsis"
+    }
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "electron ."
+    "start": "electron .",
+    "dist": "electron-builder"
   },
   "author": "EJ BEAN",
   "license": "ISC",
   "devDependencies": {
-    "electron": "^13.0.0"
+    "electron": "^13.0.1",
+    "electron-builder": "^22.10.4"
   },
   "dependencies": {
-    "electron-builder": "^22.10.5",
     "electron-localshortcut": "^3.2.1",
     "electron-store": "^8.0.0"
   }

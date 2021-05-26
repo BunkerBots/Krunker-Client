@@ -4,29 +4,36 @@
  */
 const { app, BrowserWindow, screen, clipboard } = require('electron');
 const path = require('path');
-const { keys } = require('./javascript/functions');
 const krunkerurl = 'https://krunker.io/';
 const Store = require('electron-store');
 const store = new Store();
 const shortcuts = require('electron-localshortcut');
+const { evalURL } = require('./utils/evalURL');
 
 if (!app.requestSingleInstanceLock()) app.quit();
 
 let game = null;
 let splash = null;
+let social = null;
 // functions
 
 function createShortcutKeys() {
     const contents = game.webContents;
+    const clipboardURL = clipboard.readText();
+    const type = evalURL(clipboardURL);
+    contents.on('dom-ready', () => {
+        if (type == 'game') shortcuts.register(game, 'F3', () => createGameWindow(clipboardURL)); // load game from clipboard
+        else if (type == 'social') shortcuts.register(game, 'F3', () => createSocialWindow(clipboardURL));
+    });
     shortcuts.register(game, 'Escape', () => contents.executeJavaScript('document.exitPointerLock()', true));
-    shortcuts.register(game, 'F5', () => contents.reload());
+    shortcuts.register(game, 'F5', () => contents.reload()); // reload page
     shortcuts.register(game, 'Shift+F5', () => contents.reloadIgnoringCache());
-    shortcuts.register(game, 'F11', () => {
+    shortcuts.register(game, 'F11', () => { // toggle fullscreen
         if (!game.isFullScreen()) game.setFullScreen(true);
         else game.setFullScreen(false);
     });
-    shortcuts.register(game, 'CommandOrControl+L', () => clipboard.writeText(contents.getURL()));
-    shortcuts.register(game, 'F6', () => {
+    shortcuts.register(game, 'F2', () => clipboard.writeText(contents.getURL())); // copy URL to clipboard
+    shortcuts.register(game, 'F6', () => { // reload client
         app.quit();
         createGameWindow('https://krunker.io/');
     });
@@ -58,6 +65,7 @@ function createGameWindow(url, webContents) {
         height: height,
         center: true,
         show: false,
+        autoHideMenuBar: true,
         webPreferences: {
             preload: path.join(__dirname, 'preload.js'),
             contextIsolation: false,
@@ -68,6 +76,23 @@ function createGameWindow(url, webContents) {
     // keys(game, createGameWindow, app, true);
     if (!webContents) game.loadURL(url);
     return game;
+}
+
+function createSocialWindow(url, webContents) {
+    const { width, height } = screen.getPrimaryDisplay().workArea;
+    social = new BrowserWindow({
+        width: width,
+        height: height,
+        center: true,
+        show: false,
+        webPreferences: {
+            preload: path.join(__dirname, 'preload.js'),
+            contextIsolation: false,
+        }
+    });
+    // keys(game, createGameWindow, app, true);
+    if (!webContents) social.loadURL(url);
+    return social;
 }
 
 function initClient() { // splash and game
