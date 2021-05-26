@@ -1,17 +1,22 @@
 /* eslint-disable no-unused-vars */
+/**
+ * Loading modules
+ */
 const { app, BrowserWindow, screen, globalShortcut } = require('electron');
 const path = require('path');
 const { keys } = require('./javascript/functions');
 const krunkerurl = 'https://krunker.io/';
 const Store = require('electron-store');
 const store = new Store();
-let display;
 
 if (!app.requestSingleInstanceLock()) app.quit();
 
+let game = null;
+let splash = null;
+// functions
 
-function initSplashWindow() {
-    const win = new BrowserWindow({
+function createSplashWindow() {
+    splash = new BrowserWindow({
         width: 600,
         height: 300,
         center: true,
@@ -23,13 +28,13 @@ function initSplashWindow() {
             preload: `${__dirname}/splash.js`,
         }
     });
-    win.loadFile('src/html/splash.html');
-    return win;
+    splash.loadFile('src/html/splash.html');
+    return splash;
 }
 
-function initClient(url, webContents) {
+function createGameWindow(url, webContents) {
     const { width, height } = screen.getPrimaryDisplay().workArea;
-    const win = new BrowserWindow({
+    game = new BrowserWindow({
         width: width,
         height: height,
         center: true,
@@ -39,25 +44,51 @@ function initClient(url, webContents) {
             preload: path.join(__dirname, 'preload.js')
         }
     });
-    const contents = win.webContents;
+    const contents = game.webContents;
 
-    keys(win, initClient, app, true);
-    if (!webContents) win.loadURL(url);
-    return win;
+    keys(game, createGameWindow, app, true);
+    if (!webContents) game.loadURL(url);
+    return game;
 }
 
-
-app.once('ready', async() => {
-    const splash = initSplashWindow();
-    const mainWin = initClient(krunkerurl);
-    mainWin.once('ready-to-show', async() => {
+function initClient() { // splash and game
+    const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
+    const splashScreen = createSplashWindow();
+    const gameScreen = createGameWindow(krunkerurl);
+    gameScreen.once('ready-to-show', async() => {
         wait(10000).then(() => {
-            splash.destroy();
-            mainWin.show();
+            splashScreen.destroy();
+            gameScreen.show();
         });
     });
+}
+
+/**
+ * functions end
+ * main events
+ */
+app.whenReady().then(() => {
+    initClient();
 });
-const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
+
+app.on('quit', () => {
+    app.quit();
+});
+
+app.on('window-all-closed', () => {
+    if (process.platform != 'darwin') app.quit();
+});
+// app.once('ready', async() => {
+//     const splashScreen = createSplashWindow();
+//     const gameScreen = createGameWindow(krunkerurl);
+//     gameScreen.once('ready-to-show', async() => {
+//         wait(10000).then(() => {
+//             splashScreen.destroy();
+//             gameScreen.show();
+//         });
+//     });
+// });
+
 // app.whenReady().then(() => {
 //     initClient();
 // });
@@ -69,10 +100,3 @@ const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
 //     if (process.platform !== 'darwin') app.quit();
 // });
 
-app.on('quit', () => {
-    app.quit();
-});
-
-app.on('window-all-closed', () => {
-    if (process.platform != 'darwin') app.quit();
-});
