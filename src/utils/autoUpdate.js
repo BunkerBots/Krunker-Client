@@ -15,13 +15,17 @@ async function autoUpdate(contents, win) {
                 contents.send('message', `Error ${err.name}`);
                 reject(`Error: ${err.name}`);
             });
-            autoUpdater.on('checking-for-update', () => contents.send('message', 'Checking for update'));
+            autoUpdater.on('checking-for-update', () => {
+                console.log('Checking for update');
+                contents.send('message', 'Checking for update');
+                resolve();
+            });
             autoUpdater.on('update-available', info => {
                 contents.send('message', `Update v${info.version} available`, info.releaseDate);
                 resolve();
             });
             autoUpdater.on('update-not-availabe', info => {
-                console.log(info);
+                console.log([info, 'not ava']);
                 contents.send('message', 'No update available');
                 resolve();
             });

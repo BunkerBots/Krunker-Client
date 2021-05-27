@@ -25,7 +25,10 @@ window.addEventListener('DOMContentLoaded', () => {
     replaceText('version', `v${version}`);
 });
 
-ipcRenderer.on('message', text => {
-    const element = document.getElementById('status');
-    element.innerText = text;
+const details = document.getElementById('status');
+const message = document.getElementById('status');
+ipcRenderer.on('message', (event, messageText = '', detailsText = '') => {
+    if (messageText != null) message.innerText = messageText;
+
+    if (detailsText != null) details.innerText = detailsText;
 });
