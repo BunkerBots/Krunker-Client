@@ -1,3 +1,9 @@
+/**
+ * Krunker Client URL validator
+ * @param {string} url
+ * @returns validated URL (social || external || viewer || editor || unknown || docs)
+ */
+
 function evalURL(url = '') {
     if (!isValidURL(url)) return 'unknown';
 
