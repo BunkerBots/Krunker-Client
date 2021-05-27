@@ -11,7 +11,6 @@ const shortcuts = require('electron-localshortcut');
 const { evalURL, autoUpdate } = require('./utils');
 // const { initClient } = require('./client/client');
 
-
 app.commandLine.appendSwitch('disable-frame-rate-limit');
 app.commandLine.appendSwitch('ignore-gpu-blacklist');
 app.commandLine.appendSwitch('disable-breakpad');
@@ -192,4 +191,3 @@ app.on('window-all-closed', () => {
 // app.on('window-all-closed', () => {
 //     if (process.platform !== 'darwin') app.quit();
 // });
-
