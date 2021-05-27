@@ -170,24 +170,4 @@ app.on('quit', () => {
 app.on('window-all-closed', () => {
     if (process.platform != 'darwin') app.quit();
 });
-// app.once('ready', async() => {
-//     const splashScreen = createSplashWindow();
-//     const gameScreen = createGameWindow(krunkerurl);
-//     gameScreen.once('ready-to-show', async() => {
-//         wait(10000).then(() => {
-//             splashScreen.destroy();
-//             gameScreen.show();
-//         });
-//     });
-// });
 
-// app.whenReady().then(() => {
-//     initClient();
-// });
-
-// app.on('activate', () => {
-//     if (BrowserWindow.getAllWindows().length === 0) createWindow();
-// });
-// app.on('window-all-closed', () => {
-//     if (process.platform !== 'darwin') app.quit();
-// });
