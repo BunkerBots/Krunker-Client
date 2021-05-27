@@ -26,3 +26,12 @@ body {
     position: fixed;
     bottom: 8%;
 }
+
+#version {
+    width: 100%;
+    top: 50%;
+    text-align: center;
+    color: white;
+    position: fixed;
+    top: 40%;
+}
