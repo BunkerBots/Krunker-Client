@@ -1,12 +1,24 @@
+/* eslint-disable no-unused-vars */
 /* eslint-disable no-undef */
-
 const { ipcRenderer } = require('electron');
 
-document.addEventListener('DOMContentLoaded', () => {
-    const version = document.getElementById('version');
-    const versionJSON = require('../data/core.json').version.toString();
-    // version.innerText = versionJSON;
-    ipcRenderer.on('change-text-element', (event, data) => {
-        document.getElementById('version').innerHTML = versionJSON;
-    });
+const tips = [
+    'Use F5 to reload your page',
+    'want to switch lobbies faster? hit F6'
+];
+
+window.addEventListener('DOMContentLoaded', () => {
+    /**
+     *
+     * @param {string} selector
+     * @param {string} text
+     * @returns element
+     */
+    const viewTips = (selector, text) => {
+        const element = document.getElementById(selector);
+        if (element) element.innerHTML = text;
+        return element;
+    };
+    const tip = tips[Math.floor(Math.random() * tips.length)];
+    viewTips('tips', `Tips: ${tip}`);
 });
