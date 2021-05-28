@@ -8,7 +8,8 @@ const krunkerurl = 'https://krunker.io/';
 const Store = require('electron-store');
 const store = new Store();
 const shortcuts = require('electron-localshortcut');
-const { evalURL, autoUpdate } = require('./utils');
+const { evalURL } = require('./utils');
+const { autoUpdate } = require('./utils/autoUpdate');
 // const { initClient } = require('./client/client');
 
 app.commandLine.appendSwitch('disable-frame-rate-limit');
@@ -140,18 +141,27 @@ function createWindow(url, webContents) {
  */
 
 function initClient() { // splash and game
+    createSplashWindow();
+    // const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
+    // const splashScreen = createSplashWindow();
+    // const gameScreen = createGameWindow(krunkerurl.toString());
+    // gameScreen.once('ready-to-show', async() => {
+    //     // wait(3000).then(() => {
+    //     //     splashScreen.destroy();
+    //     //     gameScreen.show();
+    //     // });
+    //     // autoUpdate(splashScreen.webContents, splashScreen).finally(() => {
+    //     //     splashScreen.destroy();
+    //     //     gameScreen.show();
+    //     // });
+    // });
     const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
-    const splashScreen = createSplashWindow();
-    const gameScreen = createGameWindow(krunkerurl.toString());
-    gameScreen.once('ready-to-show', async() => {
-        wait(3000).then(() => {
-            splashScreen.destroy();
-            gameScreen.show();
+    autoUpdate(splash.webContents, splash).finally(() => {
+        const x = createGameWindow(krunkerurl);
+        wait(2000).then(() => {
+            splash.destroy();
+            x.show();
         });
-        // autoUpdate(splash.webContents, splash).finally(() => {
-        //     splash.destroy();
-        //     gameScreen.show();
-        // });
     });
 }
 
