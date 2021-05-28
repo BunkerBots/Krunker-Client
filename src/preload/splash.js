@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable no-undef */
 const { ipcRenderer } = require('electron');
-const { version } = require('../data/core.json');
+const version = require('../../package.json').version;
 const tips = [
     'Use F5 to reload your page',
     'want to switch lobbies faster? hit F6',

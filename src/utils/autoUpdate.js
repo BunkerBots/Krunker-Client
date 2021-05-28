@@ -25,8 +25,8 @@ async function autoUpdate(contents, win) {
                     //         resolve();
                     //     });
                     // }
-                    wait(2000);
-                    resolve();
+                    // wait(2000);
+                    // resolve();
                 });
             });
             // eslint-disable-next-line max-statements-per-line
@@ -39,7 +39,6 @@ async function autoUpdate(contents, win) {
             autoUpdater.on('checking-for-update', () => {
                 console.log('Checking for updates');
                 contents.send('message', 'Checking for updates');
-                resolve();
             });
             autoUpdater.on('update-not-available', () => {
                 contents.send('message', 'No update available');
@@ -48,7 +47,6 @@ async function autoUpdate(contents, win) {
             });
             autoUpdater.on('update-available', info => {
                 contents.send('message', `Update v${info.version} available`, info.releaseDate);
-                resolve();
             });
 
             autoUpdater.on('download-progress', info => {
