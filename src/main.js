@@ -1,5 +1,6 @@
 /* eslint-disable no-unused-vars */
 /**
+ * v1.0.1
  * Loading modules
  */
 const { app, BrowserWindow, screen, clipboard } = require('electron');
