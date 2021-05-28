@@ -23,12 +23,13 @@ window.addEventListener('DOMContentLoaded', () => {
     const tip = tips[Math.floor(Math.random() * tips.length)];
     replaceText('tips', `Tips: ${tip}`);
     replaceText('version', `v${version}`);
+
+    const details = document.getElementById('details');
+    const message = document.getElementById('message');
+    ipcRenderer.on('message', (event, messageText = '', detailsText = '') => {
+        if (messageText != null) message.innerText = messageText;
+
+        if (detailsText != null) details.innerText = detailsText;
+    });
 });
 
-const details = document.getElementById('status');
-const message = document.getElementById('status');
-ipcRenderer.on('message', (event, messageText = '', detailsText = '') => {
-    if (messageText != null) message.innerText = messageText;
-
-    if (detailsText != null) details.innerText = detailsText;
-});

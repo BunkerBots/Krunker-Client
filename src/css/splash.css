@@ -27,11 +27,24 @@ body {
     bottom: 8%;
 }
 
-#version {
+#message {
     width: 100%;
     top: 50%;
     text-align: center;
     color: white;
     position: fixed;
-    top: 40%;
+    top: 50%;
+}
+
+#details {
+    width: 100%;
+    top: 50%;
+    text-align: center;
+    color: white;
+    position: fixed;
+    top: 60%;
+}
+
+#version {
+    color: white;
 }
