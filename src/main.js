@@ -1,9 +1,8 @@
 /* eslint-disable no-unused-vars */
-/**
- * v1.0.1
- * Loading modules
- */
-const { app, BrowserWindow, screen, clipboard } = require('electron');
+/*
+*   v1.0.2
+*/
+const { app, BrowserWindow, screen, clipboard, dialog } = require('electron');
 const path = require('path');
 const krunkerurl = 'https://krunker.io/';
 const Store = require('electron-store');
@@ -11,8 +10,8 @@ const store = new Store();
 const shortcuts = require('electron-localshortcut');
 const { evalURL } = require('./utils');
 const { autoUpdate } = require('./utils/autoUpdate');
-// const { initClient } = require('./client/client');
 
+// modifying chromium
 app.commandLine.appendSwitch('disable-frame-rate-limit');
 app.commandLine.appendSwitch('ignore-gpu-blacklist');
 app.commandLine.appendSwitch('disable-breakpad');
@@ -36,11 +35,15 @@ app.commandLine.appendSwitch('disable-logging');
 app.commandLine.appendSwitch('disable-web-security');
 app.commandLine.appendSwitch('webrtc-max-cpu-consumption-percentage=100');
 
+
+// prevents multiple instances
 if (!app.requestSingleInstanceLock()) app.quit();
 
 let game = null;
 let splash = null;
 let social = null;
+let internetConnection = true;
+let errText;
 // functions
 
 /**
@@ -52,23 +55,20 @@ function createShortcutKeys() {
     const contents = game.webContents;
     const clipboardURL = clipboard.readText();
     const type = evalURL(clipboardURL);
-    // contents.on('dom-ready', () => {
-    //     if (type == 'game') shortcuts.register(game, 'F3', () => createGameWindow(clipboardURL)); // load game from clipboard
-    //     else if (type == 'social') shortcuts.register(game, 'F3', () => createSocialWindow(clipboardURL));
-    // });
     shortcuts.register(game, 'Escape', () => contents.executeJavaScript('document.exitPointerLock()', true));
     shortcuts.register(game, 'F5', () => contents.reload()); // reload page
     shortcuts.register(game, 'Shift+F5', () => contents.reloadIgnoringCache());
-    shortcuts.register(game, 'F11', () => { // toggle fullscreen
-        if (!game.isFullScreen()) game.setFullScreen(true);
-        else game.setFullScreen(false);
-    });
+    shortcuts.register(game, 'F11', () => game.isFullScreen() ? game.setFullScreen(false) : game.setFullScreen(true)); // toggle fullscreen
+    //     if (!game.isFullScreen()) game.setFullScreen(true);
+    //     else game.setFullScreen(false);
+    // });
     shortcuts.register(game, 'F2', () => clipboard.writeText(contents.getURL())); // copy URL to clipboard
     shortcuts.register(game, 'F6', () => { // reload client
         app.quit();
         createGameWindow('https://krunker.io/');
     });
     shortcuts.register(game, 'CommandOrControl+Shift+N', () => createGameWindow(contents.getURL()));
+    shortcuts.register(game, 'F12', () => contents.toggleDevTools());
     return game;
 }
 
@@ -95,6 +95,7 @@ function createSplashWindow() {
     return splash;
 }
 
+
 /**
  * Creates the main game window
  * @param {string} url
@@ -117,7 +118,12 @@ function createGameWindow(url, webContents) {
     });
     const contents = game.webContents;
     createShortcutKeys();
-    if (!webContents) game.loadURL(url);
+    if (!webContents) {
+        game.loadURL(krunkerurl).catch((err) => {
+            internetConnection = false;
+            errText = `${err}`;
+        });
+    }
     return game;
 }
 
@@ -139,29 +145,24 @@ function createWindow(url, webContents) {
 
 /**
  * Main function, splash window + game window
+ * Auto updated is initiated after splash screen
+ * Returns a dialog box and quits process when intenet connection is not detected
  */
 
 function initClient() { // splash and game
     createSplashWindow();
-    // const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
-    // const splashScreen = createSplashWindow();
-    // const gameScreen = createGameWindow(krunkerurl.toString());
-    // gameScreen.once('ready-to-show', async() => {
-    //     // wait(3000).then(() => {
-    //     //     splashScreen.destroy();
-    //     //     gameScreen.show();
-    //     // });
-    //     // autoUpdate(splashScreen.webContents, splashScreen).finally(() => {
-    //     //     splashScreen.destroy();
-    //     //     gameScreen.show();
-    //     // });
-    // });
     const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
     autoUpdate(splash.webContents, splash).finally(() => {
-        const x = createGameWindow(krunkerurl);
+        createGameWindow(krunkerurl);
         wait(2000).then(() => {
+            if (internetConnection == false) {
+                splash.destroy();
+                dialog.showErrorBox('Failed to load krunker.io', errText);
+                app.quit();
+                return;
+            }
             splash.destroy();
-            x.show();
+            game.show();
         });
     });
 }
@@ -170,13 +171,9 @@ function initClient() { // splash and game
  * functions end
  * main events
  */
-app.whenReady().then(() => {
-    initClient();
-});
+app.whenReady().then(() => initClient());
 
-app.on('quit', () => {
-    app.quit();
-});
+app.on('quit', () => app.quit());
 
 app.on('window-all-closed', () => {
     if (process.platform != 'darwin') app.quit();

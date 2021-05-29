@@ -1,9 +1,7 @@
 const log = require('electron-log');
-// eslint-disable-next-line no-unused-vars
-const version = require('../../package.json').version;
 
 /**
- * Krunker Client auto updator
+ * Krunker Client auto updater
  * @param {*} contents window webcontents
  * @param {*} win window
  * @returns Promise
@@ -15,26 +13,11 @@ async function autoUpdate(contents, win) {
             contents.send('message', 'Initializing auto updater plugin...');
             const { autoUpdater } = require('electron-updater');
             autoUpdater.logger = log;
-            wait(2000).then(() => {
-                // contents.send('message', 'Checking for updates');
-                autoUpdater.checkForUpdates().then(() => {
-                    // if (x.updateInfo.version == version) contents.send('message', 'No updates found');
-                    // else {
-                    //     autoUpdater.on('update-available', info => {
-                    //         contents.send('message', `Update v${info.version} available`, info.releaseDate);
-                    //         resolve();
-                    //     });
-                    // }
-                    // wait(2000);
-                    // resolve();
-                });
-            });
-            // eslint-disable-next-line max-statements-per-line
-            // autoUpdater.checkForUpdates().then(() => { wait(2000); resolve(); });
+            wait(2000).then(() => autoUpdater.checkForUpdates());
             autoUpdater.on('error', err => {
                 console.error(err);
-                contents.send('message', `Error ${err.name}`);
-                reject(`Error: ${err.name}`);
+                contents.send('message', 'Auto update failed', err);
+                wait(4000).then(() => reject(`Error: ${err}`));
             });
             autoUpdater.on('checking-for-update', () => {
                 console.log('Checking for updates');
@@ -62,3 +45,8 @@ async function autoUpdate(contents, win) {
 }
 
 module.exports = { autoUpdate };
+
+/**
+ * Autoupdater events are only emitted after autoupdater.checkForUpdates();
+ * wait() is used so that the dom content can be displayed before emitting the events
+ */
